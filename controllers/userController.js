@@ -1,24 +1,58 @@
 import { userHelper } from "../helpers/userHelper.js";
 const userSignup=async(req,res)=>{
  const signupData=req.body;
+ console.log(signupData,"signup data")
+ 
  req.session.userSignupData=signupData;
  const findDuplicateUser=await userHelper.duplicateUserSignup(signupData);
  if(findDuplicateUser.success){
-    userHelper.usersignup(signupData).then((response)=>{
-        if(response.success){
-            res.json({success:true,message:"signup success",user:response.userData})
-        }else{
-            res.json({message:"unable to signup the user"})
-        }
-    })
+//    userHelper.createUserSignupOtp(signupData).then ((response)=>{
+//     if(response.statusMessageSent){
+//         req.session.signUpOtpFromTwilioAwaited = true;
+//         return res.json({success:true,message:"otp send succesfully",response})
+//     }else{
+//         return res.json({success:false,message:"cannot send otp"})
+//     }
+//    })
+return res.json({success:true})
  }else{
-    res.json({success:false,message:"user email already exist"})
+    res.json({success:false,message:findDuplicateUser.message})
  }
 }
-
-const getsessionUser=async(req,res)=>{
-    const sessionuser=req.session.userSignupData;
-    res.json({useringet:sessionuser})
+const verifyUserSignup=async(req,res)=>{
+    try {
+        const bodydata=req.body;
+        console.log(bodydata)
+        const userSignupData=req.session?.userSignupData;
+        // userHelper.verifyUserOtp(userData.phone,bodydata.otp).then((response)=>{
+        //     console.log(response,"response in user controller verify otp")
+        //     if(response.status=='approved'){
+        //         userHelper.usersignup(userSignupData).then((response)=>{
+        //             console.log(response)
+        //             if(response.success){
+        //           return res.json({success:true,message:"otp verified",newUser:response?.newUser})
+        //             }
+        //         })
+                
+        //     }else{
+        //        return response.json({success:false,message:"incorrect otp"})
+        //     }
+        // })
+        if(userSignupData){
+           
+               userHelper.usersignup(userSignupData).then((response)=>{
+                console.log(response)
+                  if(response.success){
+                 return res.json({success:true,message:"otp verified",newUser:response?.newUser})
+                  }
+               })
+            }
+       
+    }catch (error) {
+        
+    }
 }
 
-export {userSignup,getsessionUser}
+
+
+export {userSignup,verifyUserSignup}
